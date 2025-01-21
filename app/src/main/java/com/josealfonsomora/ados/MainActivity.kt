@@ -2,7 +2,9 @@
 
 package com.josealfonsomora.ados
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,13 +29,67 @@ import androidx.compose.ui.unit.dp
 import com.josealfonsomora.ados.ui.theme.ADOSTheme
 
 class MainActivity : ComponentActivity() {
+    private val TAG = this.javaClass.simpleName
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate: The application has been opened.")
         enableEdgeToEdge()
         setContent {
             ADOSTheme {
                 MainContent()
 
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: The activity is now visible to the user.")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: The activity is now in the foreground and interactive.")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause: The activity is being paused; it is no longer in the foreground.")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: The activity is no longer visible to the user.")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy: The activity is being destroyed.")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "onRestart: The activity is restarting after being stopped.")
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        Log.d(TAG, "onLowMemory: The system is running low on memory. $level")
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                Log.d(TAG, "Screen Rotation: The screen is now in landscape mode.")
+            }
+            Configuration.ORIENTATION_PORTRAIT -> {
+                Log.d(TAG, "Screen Rotation: The screen is now in portrait mode.")
+            }
+            else -> {
+                Log.d(TAG, "Screen Rotation: The screen orientation has changed to an undefined mode.")
             }
         }
     }
