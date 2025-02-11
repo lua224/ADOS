@@ -15,19 +15,33 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.room.Entity
+import com.josealfonsomora.ados.data.sqlite.AdosDatabaseSqlite
+import com.josealfonsomora.ados.domain.Autobus
 import com.josealfonsomora.ados.ui.theme.ADOSTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     private val TAG = this.javaClass.simpleName
@@ -99,6 +113,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun MainContent() {
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text("ADOS") }) }) { innerPadding ->
@@ -109,23 +124,43 @@ private fun MainContent() {
                 modifier = Modifier.fillMaxWidth(),
                 contentScale = ContentScale.FillWidth
             )
-            ListOfDonationPlaces()
+            var autobuses by remember { mutableStateOf<List<Autobus>>(emptyList()) }
+            LaunchedEffect(Unit) {
+                autobuses = withContext(Dispatchers.IO) {
+                    AdosDatabaseSqlite(context).getAllAutobuses()
+                }
+            }
+
+            AutobusList(autobuses){
+                GlobalScope.launch(Dispatchers.IO) {
+                    AdosDatabaseSqlite(context).deleteAutobus(it.id)
+                    autobuses = AdosDatabaseSqlite(context).getAllAutobuses()
+                }
+            }
+
         }
     }
 }
 
 @Composable
-private fun ListOfDonationPlaces() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("List of places to donate", style = MaterialTheme.typography.titleLarge)
-        val itemsList = listOf(
-            "A Coruña", "Pontevedra", "Vigo", "Lugo", "Ourense"
-        )
-        LazyColumn(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            items(itemsList.sorted()) {
-                Text(it)
+fun AutobusList(autobuses: List<Autobus>, onDelete: (Autobus) -> Unit) {
+    LazyColumn {
+        items(autobuses) { autobus ->
+            AutobusItem(autobus = autobus, onDelete = onDelete)
+        }
+    }
+}
+
+@Composable
+fun AutobusItem(autobus: Autobus, onDelete: (Autobus) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = "Dirección: ${autobus.direccion}")
+            Text(text = "Fecha: ${autobus.fecha}")
+            Text(text = "Inicio: ${autobus.inicio}")
+            Text(text = "Fin: ${autobus.fin}")
+            Button(onClick = { onDelete(autobus) }) {
+                Text("Eliminar")
             }
         }
     }
