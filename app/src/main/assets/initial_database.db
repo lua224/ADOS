@@ -1,0 +1,12 @@
+CREATE TABLE autobuses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    direccion TEXT,
+    fecha TEXT,
+    inicio TEXT,
+    fin TEXT
+);
+
+INSERT INTO autobuses (direccion, fecha, inicio, fin) VALUES
+('Rúa da Coruña, Vigo', '25/10/2023', '09:30', '14:45'),
+('Praza de Galicia, Ourense', '25/10/2023', '10:15', '15:20'),
+('Rúa do Paseo, Pontevedra', '25/10/2023', '11:00', '16:10');

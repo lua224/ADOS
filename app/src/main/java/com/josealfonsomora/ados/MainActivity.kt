@@ -35,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.room.Entity
+import com.josealfonsomora.ados.data.room.AdosDatabaseRoom
 import com.josealfonsomora.ados.data.sqlite.AdosDatabaseSqlite
 import com.josealfonsomora.ados.domain.Autobus
 import com.josealfonsomora.ados.ui.theme.ADOSTheme
@@ -49,6 +50,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: The application has been opened.")
+        val roomDb = AdosDatabaseRoom.getDatabase(this)
+        GlobalScope.launch {
+            roomDb.autobusDao().getAll()
+        }
         enableEdgeToEdge()
         setContent {
             ADOSTheme {
@@ -114,6 +119,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainContent() {
     val context = LocalContext.current
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { TopAppBar(title = { Text("ADOS") }) }) { innerPadding ->
