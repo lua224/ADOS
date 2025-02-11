@@ -38,27 +38,25 @@ import androidx.room.Entity
 import com.josealfonsomora.ados.data.room.AdosDatabaseRoom
 import com.josealfonsomora.ados.data.sqlite.AdosDatabaseSqlite
 import com.josealfonsomora.ados.domain.Autobus
+import com.josealfonsomora.ados.ui.main.MainScreen
 import com.josealfonsomora.ados.ui.theme.ADOSTheme
+import dagger.hilt.EntryPoint
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val TAG = this.javaClass.simpleName
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate: The application has been opened.")
-        val roomDb = AdosDatabaseRoom.getDatabase(this)
-        GlobalScope.launch {
-            roomDb.autobusDao().getAll()
-        }
         enableEdgeToEdge()
         setContent {
             ADOSTheme {
-                MainContent()
-
+                MainScreen()
             }
         }
     }
@@ -116,66 +114,3 @@ class MainActivity : ComponentActivity() {
 
 }
 
-@Composable
-private fun MainContent() {
-    val context = LocalContext.current
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = { TopAppBar(title = { Text("ADOS") }) }) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            Image(
-                painter = painterResource(id = R.drawable.ados), // Replace with your local image resource name
-                contentDescription = "Local JPG Image",
-                modifier = Modifier.fillMaxWidth(),
-                contentScale = ContentScale.FillWidth
-            )
-            var autobuses by remember { mutableStateOf<List<Autobus>>(emptyList()) }
-            LaunchedEffect(Unit) {
-                autobuses = withContext(Dispatchers.IO) {
-                    AdosDatabaseSqlite(context).getAllAutobuses()
-                }
-            }
-
-            AutobusList(autobuses){
-                GlobalScope.launch(Dispatchers.IO) {
-                    AdosDatabaseSqlite(context).deleteAutobus(it.id)
-                    autobuses = AdosDatabaseSqlite(context).getAllAutobuses()
-                }
-            }
-
-        }
-    }
-}
-
-@Composable
-fun AutobusList(autobuses: List<Autobus>, onDelete: (Autobus) -> Unit) {
-    LazyColumn {
-        items(autobuses) { autobus ->
-            AutobusItem(autobus = autobus, onDelete = onDelete)
-        }
-    }
-}
-
-@Composable
-fun AutobusItem(autobus: Autobus, onDelete: (Autobus) -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Dirección: ${autobus.direccion}")
-            Text(text = "Fecha: ${autobus.fecha}")
-            Text(text = "Inicio: ${autobus.inicio}")
-            Text(text = "Fin: ${autobus.fin}")
-            Button(onClick = { onDelete(autobus) }) {
-                Text("Eliminar")
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ADOSTheme {
-        MainContent()
-    }
-}
