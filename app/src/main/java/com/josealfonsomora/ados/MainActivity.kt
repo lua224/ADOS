@@ -9,12 +9,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +41,7 @@ import androidx.room.Entity
 import com.josealfonsomora.ados.data.room.AdosDatabaseRoom
 import com.josealfonsomora.ados.data.sqlite.AdosDatabaseSqlite
 import com.josealfonsomora.ados.domain.Autobus
+import com.josealfonsomora.ados.ui.chucknorrisjokes.ChuckNorrisJoke
 import com.josealfonsomora.ados.ui.main.MainScreen
 import com.josealfonsomora.ados.ui.theme.ADOSTheme
 import dagger.hilt.EntryPoint
@@ -56,7 +60,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ADOSTheme {
-                MainScreen()
+                val scrollState = rememberScrollState()
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = { TopAppBar(title = { Text("ADOS") }) }) { innerPadding ->
+                    Column(modifier = Modifier.padding(innerPadding)) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ados), // Replace with your local image resource name
+                            contentDescription = "Local JPG Image",
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.FillWidth
+                        )
+                        Column(
+                            modifier = Modifier.verticalScroll(scrollState)
+                        ) {
+                            MainScreen()
+                            ChuckNorrisJoke()
+                        }
+                    }
+                }
             }
         }
     }

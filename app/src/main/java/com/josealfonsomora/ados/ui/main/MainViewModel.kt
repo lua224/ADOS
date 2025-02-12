@@ -2,6 +2,7 @@ package com.josealfonsomora.ados.ui.main
 
 import android.database.sqlite.SQLiteDatabase
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.josealfonsomora.ados.data.ReadableSqlLite
 import com.josealfonsomora.ados.data.WritableSqlLite
 import com.josealfonsomora.ados.data.room.AdosDatabaseRoom
@@ -10,7 +11,9 @@ import com.josealfonsomora.ados.domain.Autobus
 import com.josealfonsomora.ados.ui.main.MainScreenState.Loaded
 import com.josealfonsomora.ados.ui.main.MainScreenState.Loading
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,13 +32,17 @@ class MainViewModel @Inject constructor(
     }
 
     private fun fetchAutobusList() {
-        val list = sqliteHelper.getAllAutobuses()
-        _state.value = Loaded(list)
+        viewModelScope.launch(IO) {
+            val list = sqliteHelper.getAllAutobuses()
+            _state.value = Loaded(list)
+        }
     }
 
     fun deleteAutobus(autobus: Autobus) {
-        sqliteHelper.deleteAutobus(autobus.id)
-        fetchAutobusList()
+        viewModelScope.launch(IO) {
+            sqliteHelper.deleteAutobus(autobus.id)
+            fetchAutobusList()
+        }
     }
 }
 
